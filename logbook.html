@@ -2,20 +2,46 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Protokoll</title>
     <meta name="description" content="Einfaches Protokoll für Notizen mit Zeitstempel">
     <meta name="theme-color" content="#007BFF">
     <link rel="manifest" href="manifest.json">
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
         body {
             font-family: Arial, sans-serif;
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
         #timeList {
-            margin-top: 20px;
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
         }
         .timeEntry {
             display: flex;
@@ -62,23 +88,19 @@
             align-items: center;
             margin-bottom: 10px;
         }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Protokoll</h1>
-        <button id="clearButton">Alle Einträge löschen</button>
-    </div>
-    <div id="timeList"></div>
-    <div class="entryContainer">
-        <button id="logTime">Zeit protokollieren!</button>
-        <input type="text" id="noteInput" placeholder="Notiz hinzufügen..." />
+    <div id="app">
+        <div class="header">
+            <h1>Protokoll</h1>
+            <button id="clearButton">Alle Einträge löschen</button>
+        </div>
+        <div id="timeList"></div>
+        <div class="entryContainer">
+            <button id="logTime">Zeit protokollieren!</button>
+            <input type="text" id="noteInput" placeholder="Notiz hinzufügen..." />
+        </div>
     </div>
 
     <script>
@@ -125,6 +147,7 @@
                 entry.appendChild(noteInput);
                 timeList.appendChild(entry);
             });
+            timeList.scrollTop = timeList.scrollHeight;
         }
 
         function logTime() {
