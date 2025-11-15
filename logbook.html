@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Logger</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #timeList {
+            margin-top: 20px;
+        }
+        .timeEntry {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .timeEntry span {
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+        #noteInput {
+            margin-right: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+        .entryContainer {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Time Logger</h1>
+    <div class="entryContainer">
+        <input type="text" id="noteInput" placeholder="Add a note..." />
+        <button id="logTime">Log Current Time</button>
+    </div>
+    <div id="timeList"></div>
+
+    <script>
+        document.getElementById('logTime').addEventListener('click', function() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            const note = document.getElementById('noteInput').value;
+
+            const timeList = document.getElementById('timeList');
+            const entry = document.createElement('div');
+            entry.className = 'timeEntry';
+
+            const timeSpan = document.createElement('span');
+            timeSpan.textContent = timeString;
+
+            const noteInput = document.createElement('input');
+            noteInput.type = 'text';
+            noteInput.value = note;
+            noteInput.placeholder = 'Edit note...';
+
+            entry.appendChild(timeSpan);
+            entry.appendChild(noteInput);
+            timeList.appendChild(entry);
+
+            document.getElementById('noteInput').value = '';
+        });
+    </script>
+</body>
+</html>
