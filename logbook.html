@@ -65,21 +65,25 @@
     <script>
         document.getElementById('logTime').addEventListener('click', function() {
             const now = new Date();
-            const timeString = now.toLocaleTimeString('de-DE');
-            const note = document.getElementById('noteInput').value;
+            const dateString = now.toISOString().split('T')[0];
+            const timeString = now.toLocaleTimeString('de-DE', { hour12: false });
 
             const timeList = document.getElementById('timeList');
             const entry = document.createElement('div');
             entry.className = 'timeEntry';
+
+            const dateSpan = document.createElement('span');
+            dateSpan.textContent = dateString;
 
             const timeSpan = document.createElement('span');
             timeSpan.textContent = timeString;
 
             const noteInput = document.createElement('input');
             noteInput.type = 'text';
-            noteInput.value = note;
+            noteInput.value = document.getElementById('noteInput').value;
             noteInput.placeholder = 'Notiz bearbeiten...';
 
+            entry.appendChild(dateSpan);
             entry.appendChild(timeSpan);
             entry.appendChild(noteInput);
             timeList.appendChild(entry);
