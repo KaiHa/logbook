@@ -63,7 +63,7 @@
     </div>
 
     <script>
-        document.getElementById('logTime').addEventListener('click', function() {
+        function logTime() {
             const now = new Date();
             const dateString = now.toISOString().split('T')[0];
             const timeString = now.toLocaleTimeString('de-DE', { hour12: false });
@@ -89,6 +89,14 @@
             timeList.appendChild(entry);
 
             document.getElementById('noteInput').value = '';
+        }
+
+        document.getElementById('logTime').addEventListener('click', logTime);
+
+        document.getElementById('noteInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                logTime();
+            }
         });
     </script>
 </body>
