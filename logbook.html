@@ -34,6 +34,13 @@
         button:hover {
             background-color: #0056b3;
         }
+        #clearButton {
+            background-color: #dc3545;
+            float: right;
+        }
+        #clearButton:hover {
+            background-color: #c82333;
+        }
         input[type="text"] {
             padding: 8px;
             border: 1px solid #ccc;
@@ -52,10 +59,19 @@
             align-items: center;
             margin-bottom: 10px;
         }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1>Protokoll</h1>
+    <div class="header">
+        <h1>Protokoll</h1>
+        <button id="clearButton">Alle Einträge löschen</button>
+    </div>
     <div id="timeList"></div>
     <div class="entryContainer">
         <button id="logTime">Zeit protokollieren!</button>
@@ -63,41 +79,69 @@
     </div>
 
     <script>
+        function loadTimeLogs() {
+            const timeList = document.getElementById('timeList');
+            timeList.innerHTML = '';
+            const logs = JSON.parse(localStorage.getItem('timeLogs') || '[]');
+
+            logs.forEach(log => {
+                const entry = document.createElement('div');
+                entry.className = 'timeEntry';
+
+                const dateSpan = document.createElement('span');
+                dateSpan.textContent = log.date;
+
+                const timeSpan = document.createElement('span');
+                timeSpan.textContent = log.time;
+
+                const noteInput = document.createElement('input');
+                noteInput.type = 'text';
+                noteInput.value = log.note;
+                noteInput.placeholder = 'Notiz bearbeiten...';
+
+                noteInput.addEventListener('change', function() {
+                    log.note = this.value;
+                    localStorage.setItem('timeLogs', JSON.stringify(logs));
+                });
+
+                entry.appendChild(dateSpan);
+                entry.appendChild(timeSpan);
+                entry.appendChild(noteInput);
+                timeList.appendChild(entry);
+            });
+        }
+
         function logTime() {
             const now = new Date();
             const dateString = now.toISOString().split('T')[0];
             const timeString = now.toLocaleTimeString('de-DE', { hour12: false });
+            const note = document.getElementById('noteInput').value;
 
-            const timeList = document.getElementById('timeList');
-            const entry = document.createElement('div');
-            entry.className = 'timeEntry';
+            const logs = JSON.parse(localStorage.getItem('timeLogs') || '[]');
+            logs.push({ date: dateString, time: timeString, note: note });
+            localStorage.setItem('timeLogs', JSON.stringify(logs));
 
-            const dateSpan = document.createElement('span');
-            dateSpan.textContent = dateString;
-
-            const timeSpan = document.createElement('span');
-            timeSpan.textContent = timeString;
-
-            const noteInput = document.createElement('input');
-            noteInput.type = 'text';
-            noteInput.value = document.getElementById('noteInput').value;
-            noteInput.placeholder = 'Notiz bearbeiten...';
-
-            entry.appendChild(dateSpan);
-            entry.appendChild(timeSpan);
-            entry.appendChild(noteInput);
-            timeList.appendChild(entry);
-
+            loadTimeLogs();
             document.getElementById('noteInput').value = '';
         }
 
+        function clearLogs() {
+            if (confirm('Möchtest du wirklich alle Einträge löschen?')) {
+                localStorage.removeItem('timeLogs');
+                loadTimeLogs();
+            }
+        }
+
         document.getElementById('logTime').addEventListener('click', logTime);
+        document.getElementById('clearButton').addEventListener('click', clearLogs);
 
         document.getElementById('noteInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 logTime();
             }
         });
+
+        window.addEventListener('load', loadTimeLogs);
     </script>
 </body>
 </html>
