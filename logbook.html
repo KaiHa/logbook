@@ -42,6 +42,8 @@
             padding: 4px;
             border-radius: 4px;
             margin: 4px 0;
+            display: flex;
+            flex-direction: column-reverse;
         }
         .timeEntry {
             display: flex;
@@ -94,12 +96,12 @@
     <div id="app">
         <div class="header">
             <h1>Protokoll</h1>
-            <button id="clearButton">Alle Einträge löschen</button>
+            <button id="clearButton" tabindex="-1">Alle Einträge löschen</button>
         </div>
         <div id="timeList"></div>
         <div class="entryContainer">
-            <button id="logTime">Zeit protokollieren!</button>
-            <input type="text" id="noteInput" placeholder="Notiz hinzufügen..." />
+            <button id="logTime" tabindex="-1">Zeit protokollieren!</button>
+            <input type="text" tabindex="8192" id="noteInput" placeholder="Notiz hinzufügen..." />
         </div>
     </div>
 
@@ -122,7 +124,9 @@
             timeList.innerHTML = '';
             const logs = JSON.parse(localStorage.getItem('timeLogs') || '[]');
 
-            logs.forEach(log => {
+            // Einträge in umgekehrter Reihenfolge hinzufügen (neueste zuerst)
+            for (let i = logs.length - 1; i >= 0; i--) {
+                const log = logs[i];
                 const entry = document.createElement('div');
                 entry.className = 'timeEntry';
 
@@ -136,6 +140,7 @@
                 noteInput.type = 'text';
                 noteInput.value = log.note;
                 noteInput.placeholder = 'Notiz bearbeiten...';
+                noteInput.tabIndex = i + 2;
 
                 noteInput.addEventListener('change', function() {
                     log.note = this.value;
@@ -146,8 +151,8 @@
                 entry.appendChild(timeSpan);
                 entry.appendChild(noteInput);
                 timeList.appendChild(entry);
-            });
-            timeList.scrollTop = timeList.scrollHeight;
+            }
+            timeList.scrollTop = 0; // Automatisch nach unten scrollen
         }
 
         function logTime() {
@@ -180,7 +185,10 @@
             }
         });
 
-        window.addEventListener('load', loadTimeLogs);
+        window.addEventListener('load', function() {
+            loadTimeLogs();
+            document.getElementById('noteInput').focus(); // Autofokus auf #noteInput beim Laden
+        });
     </script>
 </body>
 </html>
