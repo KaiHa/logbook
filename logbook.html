@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time Logger</title>
+    <title>Protokoll</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -55,17 +55,17 @@
     </style>
 </head>
 <body>
-    <h1>Time Logger</h1>
+    <h1>Protokoll</h1>
     <div class="entryContainer">
-        <button id="logTime">Log Current Time</button>
-        <input type="text" id="noteInput" placeholder="Add a note..." />
+        <button id="logTime">Zeit protokollieren!</button>
+        <input type="text" id="noteInput" placeholder="Notiz hinzufügen..." />
     </div>
     <div id="timeList"></div>
 
     <script>
         document.getElementById('logTime').addEventListener('click', function() {
             const now = new Date();
-            const timeString = now.toLocaleTimeString();
+            const timeString = now.toLocaleTimeString('de-DE');
             const note = document.getElementById('noteInput').value;
 
             const timeList = document.getElementById('timeList');
@@ -78,7 +78,7 @@
             const noteInput = document.createElement('input');
             noteInput.type = 'text';
             noteInput.value = note;
-            noteInput.placeholder = 'Edit note...';
+            noteInput.placeholder = 'Notiz bearbeiten...';
 
             entry.appendChild(timeSpan);
             entry.appendChild(noteInput);
