@@ -91,10 +91,10 @@
         #downloadButton:hover {
             background-color: #218838;
         }
-        #logTime {
+        #logTimeButton {
             background-color: #007BFF;
         }
-        #logTime:hover {
+        #logTimeButton:hover {
             background-color: #0056b3;
         }
         input[type="text"] {
@@ -109,6 +109,8 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             flex-grow: 1;
+            inputmode: text;
+            enterkeyhint: send;
         }
         .entryContainer {
             display: flex;
@@ -128,8 +130,8 @@
         </div>
         <div id="timeList"></div>
         <div class="entryContainer">
-            <button id="logTime" tabindex="-1">Zeit protokollieren!</button>
-            <input type="text" tabindex="8192" id="noteInput" placeholder="Notiz hinzufügen..." />
+            <button id="logTimeButton" tabindex="-1">Zeit protokollieren!</button>
+            <input type="text" tabindex="8192" id="noteInput" placeholder="Notiz hinzufügen..." inputmode="text" enterkeyhint="send" />
         </div>
     </div>
 
@@ -204,7 +206,7 @@
             timeList.scrollTop = 0;
         }
 
-        function logTime() {
+        function logTime(focusInput = false) {
             const now = new Date();
             const dateString = now.toISOString().split('T')[0];
             const timeString = now.toLocaleTimeString('de-DE', { hour12: false });
@@ -243,8 +245,13 @@
             timeList.prepend(entry);
 
             document.getElementById('noteInput').value = '';
-            document.getElementById('noteInput').focus();
+            if (focusInput) {
+                document.getElementById('noteInput').focus();
+            } else {
+                document.getElementById('noteInput').blur();
+            }
             timeList.scrollTop = 0;
+            document.getElementById('noteInput').scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
 
         function clearLogs() {
@@ -290,14 +297,14 @@
             document.body.removeChild(link);
         }
 
-        document.getElementById('logTime').addEventListener('click', logTime);
+        document.getElementById('logTimeButton').addEventListener('click', () => {logTime(false)});
         document.getElementById('clearButton').addEventListener('click', clearLogs);
         document.getElementById('downloadButton').addEventListener('click', downloadCSV);
         document.getElementById('editableTitle').addEventListener('blur', saveTitle);
 
         document.getElementById('noteInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                logTime();
+                logTime(true);
             }
         });
 
