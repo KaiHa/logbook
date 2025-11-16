@@ -148,7 +148,7 @@
         }
 
         function sanitizeFilename(title) {
-            return title.replace(/[\\/:*?"<>| (){}\[\]]/g, '_');
+            return title.replace(/[\\/:*?"<>| (){}\[\]]\n\r/g, '_');
         }
 
         function saveTitle() {
