@@ -212,12 +212,39 @@
             const utcOffset = getUtcOffset();
 
             const logs = JSON.parse(localStorage.getItem('timeLogs') || '[]');
-            logs.push({ date: dateString, time: timeString, note: note, utcOffset: utcOffset });
+            const newLog = { date: dateString, time: timeString, note: note, utcOffset: utcOffset };
+            logs.push(newLog);
             localStorage.setItem('timeLogs', JSON.stringify(logs));
 
-            loadTimeLogs();
+            const timeList = document.getElementById('timeList');
+            const entry = document.createElement('div');
+            entry.className = 'timeEntry';
+
+            const dateSpan = document.createElement('span');
+            dateSpan.textContent = dateString;
+
+            const timeSpan = document.createElement('span');
+            timeSpan.textContent = timeString;
+
+            const noteInput = document.createElement('input');
+            noteInput.type = 'text';
+            noteInput.value = note;
+            noteInput.placeholder = 'Notiz bearbeiten...';
+            noteInput.tabIndex = logs.length + 1;
+
+            noteInput.addEventListener('change', function() {
+                newLog.note = this.value;
+                localStorage.setItem('timeLogs', JSON.stringify(logs));
+            });
+
+            entry.appendChild(dateSpan);
+            entry.appendChild(timeSpan);
+            entry.appendChild(noteInput);
+            timeList.prepend(entry);
+
             document.getElementById('noteInput').value = '';
             document.getElementById('noteInput').focus();
+            timeList.scrollTop = 0;
         }
 
         function clearLogs() {
