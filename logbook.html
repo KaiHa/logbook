@@ -35,6 +35,16 @@
             align-items: center;
             margin-bottom: 10px;
         }
+        #editableTitle {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 0;
+            padding: 5px;
+            border: none;
+            outline: none;
+            background: transparent;
+            width: 50%;
+        }
         #timeList {
             flex: 1;
             overflow-y: auto;
@@ -110,7 +120,7 @@
 <body>
     <div id="app">
         <div class="header">
-            <h1>Protokoll</h1>
+            <h1 id="editableTitle" contenteditable="true">Protokoll</h1>
             <div>
                 <button id="downloadButton" class="icon-button" title="Als CSV herunterladen">↓ CSV</button>
                 <button id="clearButton" class="icon-button" tabindex="-1" title="Alle Einträge löschen">X</button>
@@ -135,6 +145,22 @@
                     }
                 );
             });
+        }
+
+        function sanitizeFilename(title) {
+            return title.replace(/[\\/:*?"<>| (){}\[\]]/g, '_');
+        }
+
+        function saveTitle() {
+            const title = document.getElementById('editableTitle').textContent.trim();
+            localStorage.setItem('timeLoggerTitle', title);
+        }
+
+        function loadTitle() {
+            const savedTitle = localStorage.getItem('timeLoggerTitle');
+            if (savedTitle) {
+                document.getElementById('editableTitle').textContent = savedTitle;
+            }
         }
 
         function loadTimeLogs() {
@@ -216,7 +242,9 @@
             const now = new Date();
             const datePart = now.toISOString().split('T')[0];
             const timePart = now.toTimeString().split(' ')[0].replace(/:/g, '');
-            const filename = `protokoll_${datePart}_${timePart}.csv`;
+            const title = document.getElementById('editableTitle').textContent.trim();
+            const sanitizedTitle = sanitizeFilename(title);
+            const filename = `${sanitizedTitle}_${datePart}_${timePart}.csv`;
 
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
@@ -230,6 +258,7 @@
         document.getElementById('logTime').addEventListener('click', logTime);
         document.getElementById('clearButton').addEventListener('click', clearLogs);
         document.getElementById('downloadButton').addEventListener('click', downloadCSV);
+        document.getElementById('editableTitle').addEventListener('blur', saveTitle);
 
         document.getElementById('noteInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -238,6 +267,7 @@
         });
 
         window.addEventListener('load', function() {
+            loadTitle();
             loadTimeLogs();
             document.getElementById('noteInput').focus();
         });
