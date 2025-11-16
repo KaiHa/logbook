@@ -72,6 +72,13 @@
         #clearButton:hover {
             background-color: #c82333;
         }
+        #downloadButton {
+            background-color: #28a745;
+            margin-left: 10px;
+        }
+        #downloadButton:hover {
+            background-color: #218838;
+        }
         input[type="text"] {
             padding: 8px;
             border: 1px solid #ccc;
@@ -96,7 +103,10 @@
     <div id="app">
         <div class="header">
             <h1>Protokoll</h1>
-            <button id="clearButton" tabindex="-1">Alle Einträge löschen</button>
+            <div>
+                <button id="downloadButton">Als CSV herunterladen</button>
+                <button id="clearButton" tabindex="-1">Alle Einträge löschen</button>
+            </div>
         </div>
         <div id="timeList"></div>
         <div class="entryContainer">
@@ -176,8 +186,42 @@
             }
         }
 
+        function escapeCsvField(field) {
+            if (field.includes('"') || field.includes(',') || field.includes('\n')) {
+                return '"' + field.replace(/"/g, '""') + '"';
+            }
+            return field;
+        }
+
+        function downloadCSV() {
+            const logs = JSON.parse(localStorage.getItem('timeLogs') || '[]');
+            let csvContent = "data:text/csv;charset=utf-8,Datum,Uhrzeit,Notiz\r\n";
+            logs.forEach(log => {
+                const row = [
+                    escapeCsvField(log.date),
+                    escapeCsvField(log.time),
+                    escapeCsvField(log.note)
+                ].join(',');
+                csvContent += row + "\r\n";
+            });
+
+            const now = new Date();
+            const datePart = now.toISOString().split('T')[0];
+            const timePart = now.toTimeString().split(' ')[0].replace(/:/g, '');
+            const filename = `protokoll_${datePart}_${timePart}.csv`;
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         document.getElementById('logTime').addEventListener('click', logTime);
         document.getElementById('clearButton').addEventListener('click', clearLogs);
+        document.getElementById('downloadButton').addEventListener('click', downloadCSV);
 
         document.getElementById('noteInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
