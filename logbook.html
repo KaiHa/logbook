@@ -163,6 +163,12 @@
             }
         }
 
+        function getUtcOffset() {
+            const offset = -new Date().getTimezoneOffset();
+            const sign = offset >= 0 ? '+' : '-';
+            return `${sign}${offset}m`;
+        }
+
         function loadTimeLogs() {
             const timeList = document.getElementById('timeList');
             timeList.innerHTML = '';
@@ -203,9 +209,10 @@
             const dateString = now.toISOString().split('T')[0];
             const timeString = now.toLocaleTimeString('de-DE', { hour12: false });
             const note = document.getElementById('noteInput').value;
+            const utcOffset = getUtcOffset();
 
             const logs = JSON.parse(localStorage.getItem('timeLogs') || '[]');
-            logs.push({ date: dateString, time: timeString, note: note });
+            logs.push({ date: dateString, time: timeString, note: note, utcOffset: utcOffset });
             localStorage.setItem('timeLogs', JSON.stringify(logs));
 
             loadTimeLogs();
@@ -229,11 +236,12 @@
 
         function downloadCSV() {
             const logs = JSON.parse(localStorage.getItem('timeLogs') || '[]');
-            let csvContent = "data:text/csv;charset=utf-8,Datum,Uhrzeit,Notiz\r\n";
+            let csvContent = "data:text/csv;charset=utf-8,Datum,Uhrzeit,UTC-Offset,Notiz\r\n";
             logs.forEach(log => {
                 const row = [
                     escapeCsvField(log.date),
                     escapeCsvField(log.time),
+                    escapeCsvField(log.utcOffset),
                     escapeCsvField(log.note)
                 ].join(',');
                 csvContent += row + "\r\n";
