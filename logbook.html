@@ -134,7 +134,6 @@
             timeList.innerHTML = '';
             const logs = JSON.parse(localStorage.getItem('timeLogs') || '[]');
 
-            // Einträge in umgekehrter Reihenfolge hinzufügen (neueste zuerst)
             for (let i = logs.length - 1; i >= 0; i--) {
                 const log = logs[i];
                 const entry = document.createElement('div');
@@ -162,7 +161,7 @@
                 entry.appendChild(noteInput);
                 timeList.appendChild(entry);
             }
-            timeList.scrollTop = 0; // Automatisch nach unten scrollen
+            timeList.scrollTop = 0;
         }
 
         function logTime() {
@@ -231,7 +230,7 @@
 
         window.addEventListener('load', function() {
             loadTimeLogs();
-            document.getElementById('noteInput').focus(); // Autofokus auf #noteInput beim Laden
+            document.getElementById('noteInput').focus();
         });
     </script>
 </body>
