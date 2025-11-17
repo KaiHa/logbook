@@ -192,10 +192,21 @@
                 noteInput.value = log.note;
                 noteInput.placeholder = 'Notiz bearbeiten...';
                 noteInput.tabIndex = i + 2;
+                noteInput.title = "Notiz bearbeiten oder Eintrag löschen durch setzen auf 'xxx'.";
 
                 noteInput.addEventListener('change', function() {
-                    log.note = this.value;
-                    localStorage.setItem('timeLogs', JSON.stringify(logs));
+                    if (this.value === 'xxx') {
+                        if (confirm(`Möchtest du den Eintrag vom ${log.date} um ${log.time} wirklich löschen?`)) {
+                            logs.splice(i, 1);
+                            localStorage.setItem('timeLogs', JSON.stringify(logs));
+                            loadTimeLogs();
+                        } else {
+                            this.value = log.note;
+                        }
+                    } else {
+                        log.note = this.value;
+                        localStorage.setItem('timeLogs', JSON.stringify(logs));
+                    }
                 });
 
                 entry.appendChild(dateSpan);
@@ -233,10 +244,24 @@
             noteInput.value = note;
             noteInput.placeholder = 'Notiz bearbeiten...';
             noteInput.tabIndex = logs.length + 1;
+            noteInput.title = "Notiz bearbeiten oder Eintrag löschen durch setzen auf 'xxx'.";
 
             noteInput.addEventListener('change', function() {
-                newLog.note = this.value;
-                localStorage.setItem('timeLogs', JSON.stringify(logs));
+                if (this.value === 'xxx') {
+                    if (confirm(`Möchtest du den Eintrag vom ${dateString} um ${timeString} wirklich löschen?`)) {
+                        const index = logs.findIndex(l => l.date === dateString && l.time === timeString);
+                        if (index !== -1) {
+                            logs.splice(index, 1);
+                            localStorage.setItem('timeLogs', JSON.stringify(logs));
+                            loadTimeLogs();
+                        }
+                    } else {
+                        this.value = newLog.note;
+                    }
+                } else {
+                    newLog.note = this.value;
+                    localStorage.setItem('timeLogs', JSON.stringify(logs));
+                }
             });
 
             entry.appendChild(dateSpan);
