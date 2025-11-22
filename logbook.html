@@ -30,10 +30,16 @@
             height: 100%;
         }
         .header {
+            margin-bottom: 10px;
+        }
+        .title-container {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
+            align-items: flex-start;
+        }
+        .title-wrapper {
+            display: flex;
+            flex-direction: column;
         }
         #editableTitle {
             font-size: 1.5em;
@@ -43,8 +49,12 @@
             border: none;
             outline: none;
             background: transparent;
-            width: 50%;
             white-space: nowrap;
+        }
+        .version {
+            font-size: 0.7em;
+            color: #666;
+            margin: 2px 0 0 5px;
         }
         #timeList {
             flex: 1;
@@ -123,10 +133,15 @@
 <body>
     <div id="app">
         <div class="header">
-            <h1 id="editableTitle" contenteditable="true">Protokoll</h1>
-            <div>
-                <button id="downloadButton" class="icon-button" title="Als CSV herunterladen">↓ CSV</button>
-                <button id="clearButton" class="icon-button" tabindex="-1" title="Alle Einträge löschen">X</button>
+            <div class="title-container">
+                <div class="title-wrapper">
+                    <h1 id="editableTitle" contenteditable="true">Protokoll</h1>
+                    <span class="version">v1.0.0</span>
+                </div>
+                <div>
+                    <button id="downloadButton" class="icon-button" title="Als CSV herunterladen">↓ CSV</button>
+                    <button id="clearButton" class="icon-button" tabindex="-1" title="Alle Einträge löschen">X</button>
+                </div>
             </div>
         </div>
         <div id="timeList"></div>
