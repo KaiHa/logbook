@@ -196,7 +196,7 @@
         }
 
         // --- Core Functions ---
-        function createTimeEntryElement(log, index) {
+        function createTimeEntryElement(log, tabindex) {
             const entry = document.createElement('div');
             entry.className = 'timeEntry';
             entry.dataset.id = log.id;
@@ -211,7 +211,7 @@
             noteInput.type = 'text';
             noteInput.value = log.note;
             noteInput.placeholder = 'Notiz bearbeiten...';
-            noteInput.tabIndex = index + 2;
+            noteInput.tabIndex = tabindex + 2;
             noteInput.title = "Eintrag löschen: Notiz auf 'xxx' setzen und bestätigen";
 
             noteInput.addEventListener('change', () => handleNoteChange(noteInput, log));
@@ -245,9 +245,9 @@
             elements.timeList.innerHTML = '';
             const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 
-            logs.slice().reverse().forEach((log, i) => {
+            logs.slice().forEach((log, i) => {
                 const entry = createTimeEntryElement(log, i);
-                elements.timeList.appendChild(entry);
+                elements.timeList.prepend(entry);
             });
 
             elements.timeList.scrollTop = 0;
