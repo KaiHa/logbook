@@ -44,6 +44,7 @@
             outline: none;
             background: transparent;
             width: 50%;
+            white-space: nowrap;
         }
         #timeList {
             flex: 1;
@@ -198,7 +199,6 @@
             noteInput.tabIndex = index + 2;
             noteInput.title = "Eintrag löschen: Notiz auf 'xxx' setzen und bestätigen";
 
-
             noteInput.addEventListener('change', () => handleNoteChange(noteInput, log));
 
             entry.appendChild(dateSpan);
@@ -321,6 +321,15 @@
             elements.logTimeButton.addEventListener('click', () => logTime(false));
             elements.clearButton.addEventListener('click', clearLogs);
             elements.downloadButton.addEventListener('click', downloadCSV);
+
+            elements.editableTitle.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    elements.editableTitle.blur();
+                    saveTitle();
+                }
+            });
+
             elements.editableTitle.addEventListener('blur', saveTitle);
 
             elements.noteInput.addEventListener('keypress', (e) => {
