@@ -183,6 +183,7 @@
         function createTimeEntryElement(log, index) {
             const entry = document.createElement('div');
             entry.className = 'timeEntry';
+            entry.dataset.id = log.id;
 
             const dateSpan = document.createElement('span');
             dateSpan.textContent = log.date;
@@ -209,10 +210,10 @@
 
         function handleNoteChange(input, log) {
             const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const index = logs.findIndex(l => l.date === log.date && l.time === log.time);
+            const index = logs.findIndex(x => x.id === log.id);
 
             if (input.value === DELETE_TRIGGER) {
-                if (confirm(`Möchtest du den Eintrag vom ${log.date} um ${log.time} wirklich löschen?`)) {
+                if (confirm(`Möchtest du den Eintrag ${index + 1} vom ${log.date} um ${log.time} wirklich löschen?`)) {
                     logs.splice(index, 1);
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
                     loadTimeLogs();
@@ -242,7 +243,14 @@
             const note = elements.noteInput.value;
 
             const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const newLog = { date, time, note, utcOffset: utcOffset };
+            const newLog = {
+                id: Date.now(),
+                date,
+                time,
+                utcOffset,
+                note,
+            };
+
             logs.push(newLog);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
 
