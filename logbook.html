@@ -131,159 +131,36 @@
         <div id="timeList"></div>
         <div class="entryContainer">
             <button id="logTimeButton" tabindex="-1">Zeit protokollieren!</button>
-            <input type="text" tabindex="8192" id="noteInput" placeholder="Notiz hinzufügen..." inputmode="text" enterkeyhint="send" />
+            <input type="text" tabindex="8192" id="noteInput" placeholder="Notiz hinzufügen..."
+                   title="Eintrag löschen: Notiz auf 'xxx' setzen und bestätigen" />
         </div>
     </div>
 
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js').then(
-                    function(registration) {
-                        console.log('ServiceWorker registration successful');
-                    },
-                    function(err) {
-                        console.log('ServiceWorker registration failed: ', err);
-                    }
-                );
-            });
-        }
+        // Constants
+        const DELETE_TRIGGER = 'xxx';
+        const STORAGE_KEY = 'timeLogs';
+        const TITLE_STORAGE_KEY = 'timeLoggerTitle';
 
+        // DOM Elements
+        const elements = {
+            timeList: document.getElementById('timeList'),
+            noteInput: document.getElementById('noteInput'),
+            logTimeButton: document.getElementById('logTimeButton'),
+            clearButton: document.getElementById('clearButton'),
+            downloadButton: document.getElementById('downloadButton'),
+            editableTitle: document.getElementById('editableTitle')
+        };
+
+        // --- Helper Functions ---
         function sanitizeFilename(title) {
             return title.replace(/[\\/:*?"<>| (){}\[\]]\n\r/g, '_');
-        }
-
-        function saveTitle() {
-            const title = document.getElementById('editableTitle').textContent.trim();
-            localStorage.setItem('timeLoggerTitle', title);
-        }
-
-        function loadTitle() {
-            const savedTitle = localStorage.getItem('timeLoggerTitle');
-            if (savedTitle) {
-                document.getElementById('editableTitle').textContent = savedTitle;
-            }
         }
 
         function getUtcOffset() {
             const offset = -new Date().getTimezoneOffset();
             const sign = offset >= 0 ? '+' : '-';
             return `${sign}${offset}m`;
-        }
-
-        function loadTimeLogs() {
-            const timeList = document.getElementById('timeList');
-            timeList.innerHTML = '';
-            const logs = JSON.parse(localStorage.getItem('timeLogs') || '[]');
-
-            for (let i = logs.length - 1; i >= 0; i--) {
-                const log = logs[i];
-                const entry = document.createElement('div');
-                entry.className = 'timeEntry';
-
-                const dateSpan = document.createElement('span');
-                dateSpan.textContent = log.date;
-
-                const timeSpan = document.createElement('span');
-                timeSpan.textContent = log.time;
-
-                const noteInput = document.createElement('input');
-                noteInput.type = 'text';
-                noteInput.value = log.note;
-                noteInput.placeholder = 'Notiz bearbeiten...';
-                noteInput.tabIndex = i + 2;
-                noteInput.title = "Notiz bearbeiten oder Eintrag löschen durch setzen auf 'xxx'.";
-
-                noteInput.addEventListener('change', function() {
-                    if (this.value === 'xxx') {
-                        if (confirm(`Möchtest du den Eintrag vom ${log.date} um ${log.time} wirklich löschen?`)) {
-                            logs.splice(i, 1);
-                            localStorage.setItem('timeLogs', JSON.stringify(logs));
-                            loadTimeLogs();
-                        } else {
-                            this.value = log.note;
-                        }
-                    } else {
-                        log.note = this.value;
-                        localStorage.setItem('timeLogs', JSON.stringify(logs));
-                    }
-                });
-
-                entry.appendChild(dateSpan);
-                entry.appendChild(timeSpan);
-                entry.appendChild(noteInput);
-                timeList.appendChild(entry);
-            }
-            timeList.scrollTop = 0;
-        }
-
-        function logTime(focusInput = false) {
-            const now = new Date();
-            const dateString = now.toISOString().split('T')[0];
-            const timeString = now.toLocaleTimeString('de-DE', { hour12: false });
-            const note = document.getElementById('noteInput').value;
-            const utcOffset = getUtcOffset();
-
-            const logs = JSON.parse(localStorage.getItem('timeLogs') || '[]');
-            const newLog = { date: dateString, time: timeString, note: note, utcOffset: utcOffset };
-            logs.push(newLog);
-            localStorage.setItem('timeLogs', JSON.stringify(logs));
-
-            const timeList = document.getElementById('timeList');
-            const entry = document.createElement('div');
-            entry.className = 'timeEntry';
-
-            const dateSpan = document.createElement('span');
-            dateSpan.textContent = dateString;
-
-            const timeSpan = document.createElement('span');
-            timeSpan.textContent = timeString;
-
-            const noteInput = document.createElement('input');
-            noteInput.type = 'text';
-            noteInput.value = note;
-            noteInput.placeholder = 'Notiz bearbeiten...';
-            noteInput.tabIndex = logs.length + 1;
-            noteInput.title = "Notiz bearbeiten oder Eintrag löschen durch setzen auf 'xxx'.";
-
-            noteInput.addEventListener('change', function() {
-                if (this.value === 'xxx') {
-                    if (confirm(`Möchtest du den Eintrag vom ${dateString} um ${timeString} wirklich löschen?`)) {
-                        const index = logs.findIndex(l => l.date === dateString && l.time === timeString);
-                        if (index !== -1) {
-                            logs.splice(index, 1);
-                            localStorage.setItem('timeLogs', JSON.stringify(logs));
-                            loadTimeLogs();
-                        }
-                    } else {
-                        this.value = newLog.note;
-                    }
-                } else {
-                    newLog.note = this.value;
-                    localStorage.setItem('timeLogs', JSON.stringify(logs));
-                }
-            });
-
-            entry.appendChild(dateSpan);
-            entry.appendChild(timeSpan);
-            entry.appendChild(noteInput);
-            timeList.prepend(entry);
-
-            document.getElementById('noteInput').value = '';
-            if (focusInput) {
-                document.getElementById('noteInput').focus();
-            } else {
-                document.getElementById('noteInput').blur();
-            }
-            timeList.scrollTop = 0;
-            document.getElementById('noteInput').scrollIntoView({ behavior: 'smooth', block: 'end' });
-        }
-
-        function clearLogs() {
-            if (confirm('Möchtest du wirklich alle Einträge löschen?')) {
-                localStorage.removeItem('timeLogs');
-                loadTimeLogs();
-            }
         }
 
         function escapeCsvField(field) {
@@ -293,8 +170,112 @@
             return field;
         }
 
+        function getCurrentDateTime() {
+            const now = new Date();
+            return {
+                date: now.toISOString().split('T')[0],
+                time: now.toLocaleTimeString('de-DE', { hour12: false }),
+                utcOffset: getUtcOffset()
+            };
+        }
+
+        // --- Core Functions ---
+        function createTimeEntryElement(log, index) {
+            const entry = document.createElement('div');
+            entry.className = 'timeEntry';
+
+            const dateSpan = document.createElement('span');
+            dateSpan.textContent = log.date;
+
+            const timeSpan = document.createElement('span');
+            timeSpan.textContent = log.time;
+
+            const noteInput = document.createElement('input');
+            noteInput.type = 'text';
+            noteInput.value = log.note;
+            noteInput.placeholder = 'Notiz bearbeiten...';
+            noteInput.tabIndex = index + 2;
+            noteInput.title = "Eintrag löschen: Notiz auf 'xxx' setzen und bestätigen";
+
+
+            noteInput.addEventListener('change', () => handleNoteChange(noteInput, log));
+
+            entry.appendChild(dateSpan);
+            entry.appendChild(timeSpan);
+            entry.appendChild(noteInput);
+
+            return entry;
+        }
+
+        function handleNoteChange(input, log) {
+            const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const index = logs.findIndex(l => l.date === log.date && l.time === log.time);
+
+            if (input.value === DELETE_TRIGGER) {
+                if (confirm(`Möchtest du den Eintrag vom ${log.date} um ${log.time} wirklich löschen?`)) {
+                    logs.splice(index, 1);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+                    loadTimeLogs();
+                } else {
+                    input.value = log.note;
+                }
+            } else {
+                logs[index].note = input.value;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+            }
+        }
+
+        function loadTimeLogs() {
+            elements.timeList.innerHTML = '';
+            const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+            logs.slice().reverse().forEach((log, i) => {
+                const entry = createTimeEntryElement(log, i);
+                elements.timeList.appendChild(entry);
+            });
+
+            elements.timeList.scrollTop = 0;
+        }
+
+        function logTime(focusInput = false) {
+            const { date, time, utcOffset } = getCurrentDateTime();
+            const note = elements.noteInput.value;
+
+            const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const newLog = { date, time, note, utcOffset: utcOffset };
+            logs.push(newLog);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+
+            const entry = createTimeEntryElement(newLog, logs.length);
+            elements.timeList.prepend(entry);
+
+            elements.noteInput.value = '';
+            if (focusInput) {
+                elements.noteInput.focus();
+            } else {
+                elements.noteInput.blur();
+            }
+
+            elements.timeList.scrollTop = 0;
+            elements.noteInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+
+        function clearLogs() {
+            if (confirm('Möchtest du wirklich alle Einträge löschen?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                loadTimeLogs();
+            }
+        }
+
         function downloadCSV() {
-            const logs = JSON.parse(localStorage.getItem('timeLogs') || '[]');
+            const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const now = new Date();
+            const datePart = now.toISOString().split('T')[0];
+            const timePart = now.toTimeString().split(' ')[0].replace(/:/g, '');
+            const title = elements.editableTitle.textContent.trim();
+            const sanitizedTitle = sanitizeFilename(title);
+            const filename = `${sanitizedTitle}_${datePart}_${timePart}.csv`;
+
             let csvContent = "data:text/csv;charset=utf-8,Datum,Uhrzeit,UTC-Offset,Notiz\r\n";
             logs.forEach(log => {
                 const row = [
@@ -306,13 +287,6 @@
                 csvContent += row + "\r\n";
             });
 
-            const now = new Date();
-            const datePart = now.toISOString().split('T')[0];
-            const timePart = now.toTimeString().split(' ')[0].replace(/:/g, '');
-            const title = document.getElementById('editableTitle').textContent.trim();
-            const sanitizedTitle = sanitizeFilename(title);
-            const filename = `${sanitizedTitle}_${datePart}_${timePart}.csv`;
-
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
@@ -322,22 +296,54 @@
             document.body.removeChild(link);
         }
 
-        document.getElementById('logTimeButton').addEventListener('click', () => {logTime(false)});
-        document.getElementById('clearButton').addEventListener('click', clearLogs);
-        document.getElementById('downloadButton').addEventListener('click', downloadCSV);
-        document.getElementById('editableTitle').addEventListener('blur', saveTitle);
+        function saveTitle() {
+            const title = elements.editableTitle.textContent.trim();
+            localStorage.setItem(TITLE_STORAGE_KEY, title);
+        }
 
-        document.getElementById('noteInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                logTime(true);
+        function loadTitle() {
+            const savedTitle = localStorage.getItem(TITLE_STORAGE_KEY);
+            if (savedTitle) {
+                elements.editableTitle.textContent = savedTitle;
             }
-        });
+        }
 
-        window.addEventListener('load', function() {
+        // --- Event Listeners ---
+        function setupEventListeners() {
+            elements.logTimeButton.addEventListener('click', () => logTime(false));
+            elements.clearButton.addEventListener('click', clearLogs);
+            elements.downloadButton.addEventListener('click', downloadCSV);
+            elements.editableTitle.addEventListener('blur', saveTitle);
+
+            elements.noteInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    logTime(true);
+                }
+            });
+        }
+
+        // --- Service Worker ---
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(registration => console.log('ServiceWorker registration successful'))
+                        .catch(err => console.log('ServiceWorker registration failed: ', err));
+                });
+            }
+        }
+
+        // --- Initialization ---
+        function init() {
+            registerServiceWorker();
             loadTitle();
             loadTimeLogs();
-            document.getElementById('noteInput').focus();
-        });
+            setupEventListeners();
+            elements.noteInput.focus();
+        }
+
+        // Start the app
+        init();
     </script>
 </body>
 </html>
