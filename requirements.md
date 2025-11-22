@@ -29,14 +29,12 @@
 ## **Behavioral Requirements**
 - **No focus on the note input field** after clicking the "Log Time" button.
 - **Focus on the note input field** after pressing the Enter key.
-- **UTC offset** displayed for each entry (format: `±HHmm`).
 - **Sanitize filenames** during CSV export (remove invalid characters).
 - **Keyboard-friendly**:
   - Enter key adds a new entry.
   - Mobile keyboards show a "Send" button (`enterkeyhint="send"`).
 - **Scroll behavior**:
   - New entries are scrolled into view (`scrollIntoView`).
-  - Keyboard is dismissed after logging an entry.
 - **Prevent scrolling issues** on mobile devices when the keyboard is open.
 
 ---
@@ -45,10 +43,11 @@
 - **Entry object**:
   ```json
   {
+    "id": "integer",
     "date": "YYYY-MM-DD",
-    "time": "HH\:MM\:SS",
+    "time": "hh\:mm\:ss",
     "note": "string",
-    "utcOffset": "±HHmm"
+    "utcOffset": "±minutes"
   }
   ```
 - Data storage in localStorage under the key "timeLogs".
@@ -63,5 +62,4 @@
   - Clear comments and structure for readability.
 - Service Worker registration for offline support.
 - Input validation for filenames and notes.
-- Use keydown instead of keypress for better mobile compatibility.
 - Prevent default behavior on Enter key to avoid line breaks on mobile devices.
