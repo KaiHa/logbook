@@ -207,18 +207,18 @@
             const timeSpan = document.createElement('span');
             timeSpan.textContent = log.time;
 
-            const noteInput = document.createElement('input');
-            noteInput.type = 'text';
-            noteInput.value = log.note;
-            noteInput.placeholder = 'Notiz bearbeiten...';
-            noteInput.tabIndex = tabindex + 2;
-            noteInput.title = "Eintrag löschen: Notiz auf 'xxx' setzen und bestätigen";
+            const note = document.createElement('input');
+            note.type = 'text';
+            note.value = log.note;
+            note.placeholder = 'Notiz bearbeiten...';
+            note.tabIndex = tabindex + 2;
+            note.title = "Eintrag löschen: Notiz auf 'xxx' setzen und bestätigen";
 
-            noteInput.addEventListener('change', () => handleNoteChange(noteInput, log));
+            note.addEventListener('change', () => handleNoteChange(note, log));
 
             entry.appendChild(dateSpan);
             entry.appendChild(timeSpan);
-            entry.appendChild(noteInput);
+            entry.appendChild(note);
 
             return entry;
         }
