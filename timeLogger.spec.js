@@ -201,4 +201,24 @@ test.describe('Time Logger PWA', () => {
       expect(entry.note).toBe(notes[index]);
     });
   });
+
+
+  test('Shows "Send" key on mobile keyboard for noteInput', async ({ page }) => {
+    // // Set the viewport to a mobile device size (e.g., iPhone 12)
+    // await page.setViewportSize({ width: 375, height: 812 });
+
+    // // Navigate to the app
+    // await page.goto('http://localhost:3000/logbook.html');
+
+    // Focus the note input field
+    await page.focus('#noteInput');
+
+    // Verify the input field has the correct enterkeyhint attribute
+    const enterKeyHint = await page.getAttribute('#noteInput', 'enterkeyhint');
+    expect(enterKeyHint).toBe('send');
+
+    // Verify the input mode is set to text
+    const inputMode = await page.getAttribute('#noteInput', 'inputmode');
+    expect(inputMode).toBe('text');
+  });
 });
