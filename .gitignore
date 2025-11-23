@@ -1,0 +1,5 @@
+/http-server.log
+/node_modules/
+/package-lock.json
+/package.json
+/test-results/
