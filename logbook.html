@@ -134,7 +134,7 @@
             <div class="title-container">
                 <div class="title-wrapper">
                     <h1 id="editableTitle" contenteditable="true">Protokoll</h1>
-                    <span class="version">v1.0.1</span>
+                    <span class="version">v1.0.2</span>
                 </div>
                 <div>
                     <button id="downloadButton" class="icon-button" title="Als CSV herunterladen">↓ CSV</button>
@@ -350,6 +350,9 @@
                 if (e.key === 'Enter') {
                     logTime(true);
                 }
+            });
+            elements.noteInput.addEventListener('focus', () => {
+              elements.noteInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
             });
         }
 
