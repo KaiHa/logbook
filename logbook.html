@@ -141,7 +141,7 @@
         <div class="title-container">
           <div class="title-wrapper">
             <h1 id="editableTitle" contenteditable="true">Protokoll</h1>
-            <span class="version">v1.1.0</span>
+            <span class="version">v1.1.2</span>
           </div>
           <div>
             <button id="downloadButton" class="icon-button" title="Als CSV herunterladen">
@@ -178,6 +178,7 @@
           logTimeButton: document.getElementById('logTimeButton'),
           clearButton: document.getElementById('clearButton'),
           downloadButton: document.getElementById('downloadButton'),
+          shareButton: document.getElementById('shareButton'),
           editableTitle: document.getElementById('editableTitle')
       };
 
@@ -337,7 +338,7 @@
           localStorage.setItem(TITLE_STORAGE_KEY, title);
       }
 
-      async function shareCSV() {
+      function shareCSV() {
           const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
           let csvContent = "Datum,Uhrzeit,UTC-Offset,Notiz\r\n";
           logs.forEach(log => {
@@ -365,7 +366,7 @@
 
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
               try {
-                  await navigator.share({
+                  navigator.share({
                       title: title,
                       text: 'Hier ist mein Protokoll als CSV-Datei:',
                       files: [file],
@@ -393,6 +394,7 @@
           elements.logTimeButton.addEventListener('click', () => logTime(false));
           elements.clearButton.addEventListener('click', clearLogs);
           elements.downloadButton.addEventListener('click', downloadCSV);
+          elements.shareButton.addEventListener('click', shareCSV);
 
           elements.editableTitle.addEventListener('keydown', (e) => {
               if (e.key === 'Enter') {
@@ -403,7 +405,6 @@
           });
 
           elements.editableTitle.addEventListener('blur', saveTitle);
-          document.getElementById('shareButton').addEventListener('click', shareCSV);
 
           elements.noteInput.addEventListener('keypress', (e) => {
               if (e.key === 'Enter') {
