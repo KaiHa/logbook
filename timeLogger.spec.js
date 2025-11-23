@@ -221,4 +221,27 @@ test.describe('Time Logger PWA', () => {
     const inputMode = await page.getAttribute('#noteInput', 'inputmode');
     expect(inputMode).toBe('text');
   });
+
+  test('Input field remains visible when focused (simulating virtual keyboard)', async ({ page }) => {
+    await page.setViewportSize({ width: 400, height: 600 });
+
+    for (let i = 0; i < 15; i++) {
+      await page.fill('#noteInput', `Note ${i + 1}`);
+      await page.keyboard.press('Enter');
+    }
+
+    await page.focus('#noteInput');
+
+    // Verify the input field is scrolled into view
+    await expect(page.locator('#noteInput')).toBeInViewport();
+
+    // Verify the input field is not obscured by checking its position
+    const inputBox = await page.locator('#noteInput').boundingBox();
+    expect(inputBox.y).toBeGreaterThan(0); // Not hidden above the viewport
+    expect(inputBox.y + inputBox.height).toBeLessThan(600); // Not hidden below the viewport
+
+    // Verify the input field is still usable
+    await page.fill('#noteInput', 'Test note with keyboard open');
+    await expect(page.locator('#noteInput')).toHaveValue('Test note with keyboard open');
+  });
 });
