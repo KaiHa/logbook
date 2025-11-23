@@ -120,8 +120,6 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             flex-grow: 1;
-            inputmode: text;
-            enterkeyhint: send;
         }
         .entryContainer {
             display: flex;
@@ -136,7 +134,7 @@
             <div class="title-container">
                 <div class="title-wrapper">
                     <h1 id="editableTitle" contenteditable="true">Protokoll</h1>
-                    <span class="version">v1.0.0</span>
+                    <span class="version">v1.0.1</span>
                 </div>
                 <div>
                     <button id="downloadButton" class="icon-button" title="Als CSV herunterladen">↓ CSV</button>
@@ -148,6 +146,7 @@
         <div class="entryContainer">
             <button id="logTimeButton" tabindex="-1">Zeit protokollieren!</button>
             <input type="text" tabindex="8192" id="noteInput" placeholder="Notiz hinzufügen..."
+                   enterkeyhint="send" inputmode="text"
                    title="Eintrag löschen: Notiz auf 'xxx' setzen und bestätigen" />
         </div>
     </div>
