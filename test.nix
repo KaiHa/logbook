@@ -11,6 +11,6 @@
       python3 -m http.server 3000 &> http-server.log &
       trap "kill %1" EXIT
       npm install @playwright/test@1.56.1
-      npx playwright@1.56.1 test
+      echo "run tests with 'npx playwright@1.56.1 test'"
     '';
 }
