@@ -51,7 +51,7 @@
           background: transparent;
           white-space: nowrap;
       }
-      .version {
+      .info {
           font-size: 0.7em;
           color: #666;
           margin: 2px 0 0 5px;
@@ -142,7 +142,7 @@
         <div class="title-container">
           <div class="title-wrapper">
             <h1 id="editableTitle" contenteditable="true">Protokoll</h1>
-            <span class="version">v1.1.4</span>
+            <span class="info">v1.1.4 &emsp; <span id="ptbOffset" title="The amount of time your system clock deviates from the atomic clock of the PTB"></span></span>
           </div>
           <div>
             <button id="downloadButton" class="icon-button" title="Als CSV herunterladen">
@@ -166,6 +166,7 @@
       </div>
     </div>
 
+    <script id="ptbScript" src="ptb.js"></script>
     <script>
       // Constants
       const DELETE_TRIGGER = 'xxx';
@@ -203,16 +204,25 @@
 
       function getCurrentDateTime() {
           const now = new Date();
+          // Get PTB correction values if available
+          const delta = typeof window.ptbDelta !== 'undefined' ? window.ptbDelta : 0;
+          const uncertainty = typeof window.ptbUncertainty !== 'undefined' ? window.ptbUncertainty : 0;
+
+          // Apply PTB correction to the timestamp
+          const correctedTime = new Date(now.getTime() - delta);
+
           return {
-              date: now.toISOString().split('T')[0],
-              time: now.toLocaleTimeString('en-US', {
+              date: correctedTime.toISOString().split('T')[0],
+              time: correctedTime.toLocaleTimeString('en-US', {
                   hour12: false,
                   hour: "2-digit",
                   minute: "2-digit",
                   second: "2-digit",
                   fractionalSecondDigits: 1
               }),
-              utcOffset: getUtcOffset()
+              utcOffset: getUtcOffset(),
+              clockCorrection: `${delta}`,
+              clockUncertainty: `${uncertainty}`
           };
       }
 
@@ -275,7 +285,7 @@
       }
 
       function logTime(focusInput = false) {
-          const { date, time, utcOffset } = getCurrentDateTime();
+          const { date, time, utcOffset, clockCorrection, clockUncertainty } = getCurrentDateTime();
           const note = elements.noteInput.value;
 
           const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -284,6 +294,8 @@
               date,
               time,
               utcOffset,
+              clockCorrection,
+              clockUncertainty,
               note,
           };
 
@@ -320,12 +332,14 @@
           const sanitizedTitle = sanitizeFilename(title);
           const filename = `${sanitizedTitle}_${datePart}_${timePart}.csv`;
 
-          let csvContent = "data:text/csv;charset=utf-8,Datum,Uhrzeit,UTC-Offset,Notiz\r\n";
+          let csvContent = "data:text/csv;charset=utf-8,Datum,Uhrzeit,UTC-Offset,Angewandte Zeit-Korrektur [ms],Zeit-Unsicherheit [ms],Notiz\r\n";
           logs.forEach(log => {
               const row = [
                   escapeCsvField(log.date),
                   escapeCsvField(log.time),
                   escapeCsvField(log.utcOffset),
+                  escapeCsvField(log.clockCorrection || ''),
+                  escapeCsvField(log.clockUncertainty || ''),
                   escapeCsvField(log.note)
               ].join(',');
               csvContent += row + "\r\n";
@@ -347,12 +361,14 @@
 
       function shareCSV() {
           const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-          let csvContent = "Datum,Uhrzeit,UTC-Offset,Notiz\r\n";
+          let csvContent = "Datum,Uhrzeit,UTC-Offset,Angewandte Zeit-Korrektur [ms],Zeit-Unsicherheit [ms],Notiz\r\n";
           logs.forEach(log => {
               const row = [
                   escapeCsvField(log.date),
                   escapeCsvField(log.time),
                   escapeCsvField(log.utcOffset),
+                  escapeCsvField(log.clockCorrection || ''),
+                  escapeCsvField(log.clockUncertainty || ''),
                   escapeCsvField(log.note)
               ].join(',');
               csvContent += row + "\r\n";
