@@ -190,11 +190,6 @@ function downloadCSV() {
     document.body.removeChild(link);
 }
 
-function saveTitle() {
-    const title = elements.editableTitle.textContent.trim();
-    localStorage.setItem(TITLE_STORAGE_KEY, title);
-}
-
 function shareCSV() {
     const csv = generateCSV();
     const blob = new Blob([csv.content], { type: 'text/csv' });
@@ -216,6 +211,11 @@ function shareCSV() {
     } else {
         alert('Fehler beim Teilen!  Versuchen sie es mit dem Download.');
     }
+}
+
+function saveTitle() {
+    const title = elements.editableTitle.textContent.trim();
+    localStorage.setItem(TITLE_STORAGE_KEY, title);
 }
 
 function loadTitle() {
