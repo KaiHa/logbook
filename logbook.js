@@ -193,7 +193,7 @@ function downloadCSV() {
 function shareCSV() {
     const csv = generateCSV();
     const blob = new Blob([csv.content], { type: 'text/csv' });
-    const file = new File([blob], csv.file, { type: 'text/csv' });
+    const file = new File([blob], csv.name, { type: 'text/csv' });
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
