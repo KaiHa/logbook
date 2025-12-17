@@ -1,10 +1,11 @@
-const CACHE_NAME = 'zeit-protokoll-v1.2.1';
+const CACHE_NAME = 'zeit-protokoll-v1.2.2';
 const urlsToCache = [
     '/',
     '/logbook.html',
     '/logbook.js',
     '/ptb.js',
     '/manifest.json',
+    '/favicon.svg',
     '/icon-192x192.png',
     '/icon-512x512.png'
 ];
