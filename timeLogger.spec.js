@@ -97,6 +97,53 @@ test.describe('Time Logger PWA', () => {
     expect(download.suggestedFilename()).toMatch(/\.csv$/);
   });
 
+  test('Verifies CSV file content structure and data', async ({ page }) => {
+    // Add a test entry with a specific note
+    const testNote = 'CSV Test Note';
+    await page.fill('#noteInput', testNote);
+    await page.keyboard.press('Enter');
+
+    // Trigger CSV download
+    const downloadPromise = page.waitForEvent('download');
+    await page.click('#downloadButton');
+    const download = await downloadPromise;
+
+    // Save the download to a temporary file and read its content
+    const path = await download.path();
+    const fs = require('fs');
+    const csvContent = fs.readFileSync(path, 'utf8');
+
+    // Verify CSV structure - should have header and at least one data row
+    const lines = csvContent.split('\r\n').filter(line => line.trim() !== '');
+    expect(lines.length).toBeGreaterThanOrEqual(2); // Header + at least one data row
+
+    // Verify header structure
+    const header = lines[0];
+    const expectedHeaders = ['Datum', 'Uhrzeit', 'UTC-Offset', 'Angewandte Zeit-Korrektur [ms]', 'Zeit-Unsicherheit [ms]', 'Notiz'];
+    expect(header).toBe(expectedHeaders.join(','));
+
+    // Verify data row structure - should have 6 fields (matching the header)
+    if (lines.length > 1) {
+      const dataRow = lines[1];
+      const fields = dataRow.split(',');
+      expect(fields.length).toBe(6); // Should match the number of headers
+
+      // Verify the note field contains our test note
+      const noteField = fields[5];
+      // Remove quotes if present (CSV escaping)
+      const cleanedNote = noteField.replace(/^"|"$/g, '');
+      expect(cleanedNote).toBe(testNote);
+
+      // Verify date field is in ISO format (YYYY-MM-DD)
+      const dateField = fields[0];
+      expect(dateField).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
+      // Verify time field is in HH:MM:SS.s format
+      const timeField = fields[1];
+      expect(timeField).toMatch(/^\d{2}:\d{2}:\d{2}\.\d$/);
+    }
+  });
+
   test('Persists 3 entries in localStorage', async ({ page, context }) => {
     // Add 3 entries
     const notes = ['First note', 'Second note', 'Third note'];
