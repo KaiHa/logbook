@@ -153,43 +153,7 @@ function clearLogs() {
     }
 }
 
-function downloadCSV() {
-    const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const now = new Date();
-    const datePart = now.toISOString().split('T')[0];
-    const timePart = now.toTimeString().split(' ')[0].replace(/:/g, '');
-    const title = elements.editableTitle.textContent.trim();
-    const sanitizedTitle = sanitizeFilename(title);
-    const filename = `${sanitizedTitle}_${datePart}_${timePart}.csv`;
-
-    let csvContent = "data:text/csv;charset=utf-8,Datum,Uhrzeit,UTC-Offset,Angewandte Zeit-Korrektur [ms],Zeit-Unsicherheit [ms],Notiz\r\n";
-    logs.forEach(log => {
-        const row = [
-            escapeCsvField(log.date),
-            escapeCsvField(log.time),
-            escapeCsvField(log.utcOffset),
-            escapeCsvField(log.clockCorrection || ''),
-            escapeCsvField(log.clockUncertainty || ''),
-            escapeCsvField(log.note)
-        ].join(',');
-        csvContent += row + "\r\n";
-    });
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-function saveTitle() {
-    const title = elements.editableTitle.textContent.trim();
-    localStorage.setItem(TITLE_STORAGE_KEY, title);
-}
-
-function shareCSV() {
+function generateCSV() {
     const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     let csvContent = "Datum,Uhrzeit,UTC-Offset,Angewandte Zeit-Korrektur [ms],Zeit-Unsicherheit [ms],Notiz\r\n";
     logs.forEach(log => {
@@ -207,31 +171,50 @@ function shareCSV() {
     const now = new Date();
     const datePart = now.toISOString().split('T')[0];
     const timePart = now.toTimeString().split(' ')[0].replace(/:/g, '');
-    const title = document.getElementById('editableTitle').textContent.trim();
+    const title = elements.editableTitle.textContent.trim();
     const sanitizedTitle = sanitizeFilename(title);
     const filename = `${sanitizedTitle}_${datePart}_${timePart}.csv`;
 
-    // Create a Blob with the CSV content
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    return {content: csvContent, name: filename, title: title};
+}
 
-    // Create a File object
-    const file = new File([blob], filename, { type: 'text/csv' });
+function downloadCSV() {
+    const csv = generateCSV();
+    const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csv.content);
+
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", csv.name);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function saveTitle() {
+    const title = elements.editableTitle.textContent.trim();
+    localStorage.setItem(TITLE_STORAGE_KEY, title);
+}
+
+function shareCSV() {
+    const csv = generateCSV();
+    const blob = new Blob([csv.content], { type: 'text/csv' });
+    const file = new File([blob], csv.file, { type: 'text/csv' });
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
             navigator.share({
-                title: title,
+                title: csv.title,
                 text: 'Hier ist mein Protokoll als CSV-Datei:',
                 files: [file],
             });
         } catch (error) {
             if (error.name !== 'AbortError') {
-                console.error('Fehler beim Teilen:', error);
+                console.error('Teilen fehlgeschlagen:', error);
                 alert('Teilen fehlgeschlagen: ' + error);
             }
         }
     } else {
-        alert('Fehler beim Teilen!');
+        alert('Fehler beim Teilen!  Versuchen sie es mit dem Download.');
     }
 }
 
