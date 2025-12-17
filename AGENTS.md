@@ -5,6 +5,8 @@ This is a web-based time logging application that allows users to record timesta
 
 ## Files
 - `logbook.html` - Main application file containing HTML, CSS, and JavaScript
+- `logbook.js` - Logging functionality
+- `ptb.js` - Time synchronization functionality
 - `sw.js` - Service Worker for PWA functionality
 - `manifest.json` - Web App Manifest
 - `package.json` - Node.js package configuration

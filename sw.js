@@ -1,10 +1,12 @@
-const CACHE_NAME = 'zeit-protokoll-v1';
+const CACHE_NAME = 'zeit-protokoll-v1.2.1';
 const urlsToCache = [
-  '/',
-  '/logbook.html',
-  '/manifest.json',
-  '/icon-192x192.png',
-  '/icon-512x512.png'
+    '/',
+    '/logbook.html',
+    '/logbook.js',
+    '/ptb.js',
+    '/manifest.json',
+    '/icon-192x192.png',
+    '/icon-512x512.png'
 ];
 
 self.addEventListener('install', event => {
