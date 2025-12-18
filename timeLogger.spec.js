@@ -441,28 +441,17 @@ test.describe('Time Logger PWA', () => {
         return Promise.resolve();
       };
 
-      // Mock URL functions
-      const originalCreateObjectURL = URL.createObjectURL;
-      const originalRevokeObjectURL = URL.revokeObjectURL;
-      URL.createObjectURL = (blob) => 'mock-data-url-csv';
-      URL.revokeObjectURL = () => {};
-
       // Click the share button
       document.getElementById('shareButton').click();
-
-      // Restore original functions
-      URL.createObjectURL = originalCreateObjectURL;
-      URL.revokeObjectURL = originalRevokeObjectURL;
 
       return capturedShareData;
     });
 
     // Verify that the fallback sharing was used (URL-based instead of file-based)
     expect(result).toBeTruthy();
-    expect(result).toHaveProperty('url');
-    expect(result.url).toBe('mock-data-url-csv');
     expect(result).toHaveProperty('title');
     expect(result).toHaveProperty('text');
+    expect(result.text).toMatch(/^Datum,Uhrzeit,/);
   });
 
   test('Verifies share button exists and is clickable', async ({ page }) => {

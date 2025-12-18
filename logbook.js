@@ -190,26 +190,38 @@ function downloadCSV() {
     document.body.removeChild(link);
 }
 
-function shareCSV() {
+async function shareCSV() {
     const csv = generateCSV();
     const blob = new Blob([csv.content], { type: 'text/csv' });
     const file = new File([blob], csv.name, { type: 'text/csv' });
+    const obj = { title: csv.title,
+                  text: 'Hier ist mein Protokoll als CSV-Datei.',
+                  files: [file],
+                };
 
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+
+    // Check if Web Share API is available
+    if (navigator.share) {
         try {
-            navigator.share({
-                title: csv.title,
-                text: 'Hier ist mein Protokoll als CSV-Datei:',
-                files: [file],
-            });
+            // Try sharing with files first (supported by Chrome, Edge, etc.)
+            if (navigator.canShare && navigator.canShare(obj)) {
+                await navigator.share(obj);
+            } else {
+                // Fallback for browsers that don't support file sharing (like Firefox)
+                await navigator.share({
+                    title: csv.title,
+                    text: csv.content,
+                });
+            }
         } catch (error) {
             if (error.name !== 'AbortError') {
                 console.error('Teilen fehlgeschlagen:', error);
-                alert('Teilen fehlgeschlagen: ' + error);
+                alert('Teilen fehlgeschlagen: ' + error.message);
             }
         }
     } else {
-        alert('Fehler beim Teilen!  Versuchen sie es mit dem Download.');
+        // Web Share API not available at all
+        alert('Fehler beim Teilen! Ihr Browser unterstützt das Teilen nicht. Versuchen Sie es mit dem Download.');
     }
 }
 
