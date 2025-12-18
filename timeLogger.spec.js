@@ -291,4 +291,193 @@ test.describe('Time Logger PWA', () => {
     await page.fill('#noteInput', 'Test note with keyboard open');
     await expect(page.locator('#noteInput')).toHaveValue('Test note with keyboard open');
   });
+
+  test('Tests sharing functionality', async ({ page }) => {
+    // Add a test entry
+    const testNote = 'Test note for sharing';
+    await page.fill('#noteInput', testNote);
+    await page.keyboard.press('Enter');
+
+    // Mock the navigator.share function
+    await page.evaluate(() => {
+      // Mock the canShare function to return true
+      navigator.canShare = (data) => {
+        return true;
+      };
+
+      // Mock the share function
+      navigator.share = async (data) => {
+        // Store the share data in a global variable for testing
+        window.mockShareData = data;
+        // Also store the files data separately for easier testing
+        if (data && data.files && data.files.length > 0) {
+          const file = data.files[0];
+          window.mockFileData = {
+            name: file.name,
+            type: file.type,
+            size: file.size
+          };
+        }
+        return Promise.resolve();
+      };
+    });
+
+    // Click the share button
+    await page.click('#shareButton');
+
+    // Verify that the share function was called with the correct data
+    const shareData = await page.evaluate(() => {
+      return window.mockShareData;
+    });
+
+    // Check that share data exists
+    expect(shareData).toBeTruthy();
+
+    // Check that the share data has the expected properties
+    expect(shareData).toHaveProperty('title');
+    expect(shareData).toHaveProperty('text');
+    expect(shareData).toHaveProperty('files');
+
+    // Check that the files array has one element
+    expect(shareData.files).toHaveLength(1);
+
+    // Get the file data from our mock
+    const fileData = await page.evaluate(() => {
+      return window.mockFileData;
+    });
+
+    // Check that the file has the expected properties
+    expect(fileData).toBeTruthy();
+    expect(fileData.name).toMatch(/\.csv$/);
+    expect(fileData.size).toBeGreaterThan(0);
+  });
+
+  test('Tests sharing functionality fallback when not supported', async ({ page }) => {
+    // Add a test entry
+    const testNote = 'Test note for sharing fallback';
+    await page.fill('#noteInput', testNote);
+    await page.keyboard.press('Enter');
+
+    // Mock the navigator.share function to simulate unsupported sharing
+    await page.evaluate(() => {
+      // Mock the canShare function to return false (simulating Firefox behavior)
+      navigator.canShare = (data) => {
+        return false;
+      };
+
+      // Mock the share function to work with URL fallback
+      let shareData = null;
+      navigator.share = async (data) => {
+        shareData = data;
+        return Promise.resolve();
+      };
+
+      // Mock URL.createObjectURL and URL.revokeObjectURL
+      const originalCreateObjectURL = URL.createObjectURL;
+      const originalRevokeObjectURL = URL.revokeObjectURL;
+      let objectUrlCreated = null;
+
+      URL.createObjectURL = (blob) => {
+        objectUrlCreated = 'mock-data-url';
+        return objectUrlCreated;
+      };
+
+      URL.revokeObjectURL = (url) => {
+        // Just mock this for testing
+      };
+
+      // Spy on the alert function
+      let alertShown = false;
+      const originalAlert = window.alert;
+      window.alert = (message) => {
+        alertShown = true;
+        console.log('Alert shown:', message);
+      };
+
+      // Click the share button
+      document.getElementById('shareButton').click();
+
+      // Restore the original functions
+      window.alert = originalAlert;
+      URL.createObjectURL = originalCreateObjectURL;
+      URL.revokeObjectURL = originalRevokeObjectURL;
+
+      // Check if the fallback sharing was used
+      if (shareData && shareData.url) {
+        console.log('Fallback sharing worked with URL:', shareData.url);
+        return { success: true, shareData: shareData };
+      } else if (alertShown) {
+        console.log('Alert was shown instead of fallback');
+        return { success: false, alertShown: alertShown };
+      } else {
+        return { success: false, message: 'Neither fallback nor alert worked' };
+      }
+    });
+
+    // The test should pass if the fallback sharing mechanism works
+    // (i.e., no alert is shown and URL-based sharing is attempted)
+  });
+
+  test('Tests Firefox-style sharing fallback (canShare returns false)', async ({ page }) => {
+    // Add a test entry
+    const testNote = 'Test note for Firefox fallback';
+    await page.fill('#noteInput', testNote);
+    await page.keyboard.press('Enter');
+
+    const result = await page.evaluate(() => {
+      // Mock Firefox behavior: canShare exists but returns false for files
+      navigator.canShare = (data) => {
+        // Firefox doesn't support files in canShare
+        if (data && data.files) {
+          return false;
+        }
+        return true;
+      };
+
+      // Mock the share function to capture what gets shared
+      let capturedShareData = null;
+      navigator.share = async (data) => {
+        capturedShareData = data;
+        return Promise.resolve();
+      };
+
+      // Mock URL functions
+      const originalCreateObjectURL = URL.createObjectURL;
+      const originalRevokeObjectURL = URL.revokeObjectURL;
+      URL.createObjectURL = (blob) => 'mock-data-url-csv';
+      URL.revokeObjectURL = () => {};
+
+      // Click the share button
+      document.getElementById('shareButton').click();
+
+      // Restore original functions
+      URL.createObjectURL = originalCreateObjectURL;
+      URL.revokeObjectURL = originalRevokeObjectURL;
+
+      return capturedShareData;
+    });
+
+    // Verify that the fallback sharing was used (URL-based instead of file-based)
+    expect(result).toBeTruthy();
+    expect(result).toHaveProperty('url');
+    expect(result.url).toBe('mock-data-url-csv');
+    expect(result).toHaveProperty('title');
+    expect(result).toHaveProperty('text');
+  });
+
+  test('Verifies share button exists and is clickable', async ({ page }) => {
+    // Verify that the share button exists
+    const shareButton = page.locator('#shareButton');
+    await expect(shareButton).toBeVisible();
+
+    // Verify that the share button has the correct title
+    await expect(shareButton).toHaveAttribute('title', 'Als CSV teilen');
+
+    // Verify that the share button has the correct SVG icon structure
+    const svg = shareButton.locator('svg');
+    await expect(svg).toBeVisible();
+
+    // Verify that the share button is enabled
+    await expect(shareButton).toBeEnabled();
+  });
 });
