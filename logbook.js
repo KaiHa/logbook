@@ -19,10 +19,12 @@ function sanitizeFilename(title) {
     return title.replace(/[\\/:*?"<>| (){}\[\]]\n\r/g, '_');
 }
 
+/**
+ * Get the UTC offset in minutes.
+ */
 function getUtcOffset() {
-    const offset = -new Date().getTimezoneOffset();
-    const sign = offset >= 0 ? '+' : '-';
-    return `${sign}${offset}m`;
+    const offset = -1 * new Date().getTimezoneOffset();
+    return offset >= 0 ? `+${offset}` : `${offset}`;
 }
 
 function escapeCsvField(field) {
@@ -155,14 +157,14 @@ function clearLogs() {
 
 function generateCSV() {
     const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    let csvContent = "Datum,Uhrzeit,UTC-Offset,Angewandte Zeit-Korrektur [ms],Zeit-Unsicherheit [ms],Notiz\r\n";
+    let csvContent = "Datum,Uhrzeit,UTC-Offset [m],Angewandte Zeit-Korrektur [ms],Zeit-Unsicherheit [ms],Notiz\r\n";
     logs.forEach(log => {
         const row = [
             escapeCsvField(log.date),
             escapeCsvField(log.time),
             escapeCsvField(log.utcOffset),
-            escapeCsvField(log.clockCorrection || ''),
-            escapeCsvField(log.clockUncertainty || ''),
+            escapeCsvField(log.clockCorrection >= 0 ? `+${log.clockCorrection}` : `${log.clockCorrection}`),
+            escapeCsvField(`±${log.clockUncertainty}`),
             escapeCsvField(log.note)
         ].join(',');
         csvContent += row + "\r\n";

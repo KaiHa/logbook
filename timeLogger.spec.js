@@ -119,7 +119,7 @@ test.describe('Time Logger PWA', () => {
 
     // Verify header structure
     const header = lines[0];
-    const expectedHeaders = ['Datum', 'Uhrzeit', 'UTC-Offset', 'Angewandte Zeit-Korrektur [ms]', 'Zeit-Unsicherheit [ms]', 'Notiz'];
+    const expectedHeaders = ['Datum', 'Uhrzeit', 'UTC-Offset [m]', 'Angewandte Zeit-Korrektur [ms]', 'Zeit-Unsicherheit [ms]', 'Notiz'];
     expect(header).toBe(expectedHeaders.join(','));
 
     // Verify data row structure - should have 6 fields (matching the header)
