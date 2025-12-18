@@ -113,7 +113,7 @@
       }
       #logTimeButton {
           background-color: #007BFF;
-          height: 60px;
+          height: 80px;
       }
       #logTimeButton:hover {
           background-color: #0056b3;
@@ -144,7 +144,7 @@
         <div class="title-container">
           <div class="title-wrapper">
             <h1 id="editableTitle" contenteditable="true">Protokoll</h1>
-            <span class="info">v1.2.3~rc2 &emsp; <span id="ptbOffset" title="The amount of time your system clock deviates from the atomic clock of the PTB"></span></span>
+            <span class="info">v1.2.3 &emsp; <span id="ptbOffset" title="The amount of time your system clock deviates from the atomic clock of the PTB"></span></span>
           </div>
           <div>
             <button id="downloadButton" class="icon-button" title="Als CSV herunterladen">
@@ -161,7 +161,13 @@
       </div>
       <div id="timeList"></div>
       <div class="entryContainer">
-        <button id="logTimeButton" tabindex="-1">Zeit protokollieren!</button>
+        <button id="logTimeButton" tabindex="-1">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" style="margin-right: 8px;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg><br/>
+          Zeit protokollieren!
+        </button>
         <input type="text" tabindex="8192" id="noteInput" placeholder="Notiz hinzufügen..."
                enterkeyhint="send" inputmode="text"
                title="Eintrag löschen: Notiz auf 'xxx' setzen und bestätigen" />
