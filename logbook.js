@@ -157,15 +157,15 @@ function clearLogs() {
 
 function generateCSV() {
     const logs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    let csvContent = "Datum,Uhrzeit,UTC-Offset [m],Angewandte Zeit-Korrektur [ms],Zeit-Unsicherheit [ms],Notiz\r\n";
+    let csvContent = "Datum,Uhrzeit,Notiz,UTC-Offset [m],Angewandte Zeit-Korrektur [ms],Zeit-Unsicherheit [ms]\r\n";
     logs.forEach(log => {
         const row = [
             escapeCsvField(log.date),
             escapeCsvField(log.time),
+            escapeCsvField(log.note),
             escapeCsvField(log.utcOffset),
             escapeCsvField(log.clockCorrection >= 0 ? `+${log.clockCorrection}` : `${log.clockCorrection}`),
             escapeCsvField(`±${log.clockUncertainty}`),
-            escapeCsvField(log.note)
         ].join(',');
         csvContent += row + "\r\n";
     });

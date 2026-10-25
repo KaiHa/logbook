@@ -119,7 +119,7 @@ test.describe('Time Logger PWA', () => {
 
     // Verify header structure
     const header = lines[0];
-    const expectedHeaders = ['Datum', 'Uhrzeit', 'UTC-Offset [m]', 'Angewandte Zeit-Korrektur [ms]', 'Zeit-Unsicherheit [ms]', 'Notiz'];
+    const expectedHeaders = ['Datum', 'Uhrzeit', 'Notiz', 'UTC-Offset [m]', 'Angewandte Zeit-Korrektur [ms]', 'Zeit-Unsicherheit [ms]'];
     expect(header).toBe(expectedHeaders.join(','));
 
     // Verify data row structure - should have 6 fields (matching the header)
@@ -129,7 +129,7 @@ test.describe('Time Logger PWA', () => {
       expect(fields.length).toBe(6); // Should match the number of headers
 
       // Verify the note field contains our test note
-      const noteField = fields[5];
+      const noteField = fields[2];
       // Remove quotes if present (CSV escaping)
       const cleanedNote = noteField.replace(/^"|"$/g, '');
       expect(cleanedNote).toBe(testNote);
